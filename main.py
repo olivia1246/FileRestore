@@ -1,6 +1,7 @@
 from exploit.restore import restore_files, FileToRestore
 import re
 import sys
+import os
 
 device = None
 
@@ -23,11 +24,13 @@ def is_supported_ios(version_str: str) -> bool:
 
     return False
 
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear') # i have no idea if windows works for this tool
 
 def main():
     global device
 
-    print("\nWARNING: Modifying system files incorrectly and without knowing what you are doing can cause issues to iOS or fully break it and may require a full restore of your device in severe cases.")
+    print("WARNING: Modifying system files incorrectly and without knowing what you are doing can cause issues to iOS or fully break it and may require a full restore of your device in severe cases.")
     print("Use at your own risk.")
     agree = input("Type Y to agree and continue: ").strip().upper()
 
@@ -35,6 +38,8 @@ def main():
         print("Aborting.")
         sys.exit(0)
 
+    cls()
+        
     if not device:
         print("No device detected. Please connect a device and try again.")
         sys.exit(1)
