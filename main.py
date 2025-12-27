@@ -7,27 +7,13 @@ import subprocess
 import json
 
 def detect_device():
-    try:
-        result = subprocess.run(
-            ["pymobiledevice3", "list-devices", "--json"],
-            capture_output=True, text=True
-        )
-        devices = json.loads(result.stdout)
-    except Exception:
-        devices = []
-
-    if not devices:
-        return None
-
-    udid = devices[0]["UDID"]
-
-    lockdown = LockdownClient(udid=udid)
-    info = lockdown.all_values
+    device = LockdownClient()
+    info = client.get_value()
 
     return {
-        "client": lockdown,
-        "name": info.get("DeviceName", "Unknown Device"),
-        "version": info.get("ProductVersion", "Unknown")
+        "client": device,
+        "name": info.get("DeviceName"),
+        "version": info.get("ProductVersion")
     }
 
 def is_supported_ios(version_str: str) -> bool:
