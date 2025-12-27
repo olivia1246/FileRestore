@@ -60,11 +60,11 @@ def main():
     print(f"Connected to {device['name']} running iOS {device['version']}.")
 
     if not is_supported_ios(device['version']):
-        print("\n May have detected an unsupported version of iOS 18.1 or newer.")
+        print("May have detected an unsupported version of iOS 18.1 or newer.")
         print("SparseRestore was fixed in iOS 18.1 beta 6 and newer.")
         print("If you are on iOS 18.1 beta 1-5 then you can safely ignore this message.")
 
-    local_file = input("\nDrag and drop your file here: ").strip().strip('"')
+    local_file = input("Drag and drop your file here: ").strip().strip('"')
 
     try:
         with open(local_file, "rb") as f:
