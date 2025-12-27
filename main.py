@@ -1,11 +1,35 @@
 from exploit.restore import restore_files, FileToRestore
+from pymobiledevice3.usbmux import list_devices, Usbmux
 from pymobiledevice3.lockdown import LockdownClient
 import re
 import sys
 import os
+import subprocess
+import json
 
-device = None
+def detect_device():
+    try:
+        result = subprocess.run(
+            ["pymobiledevice3", "list-devices", "--json"],
+            capture_output=True, text=True
+        )
+        devices = json.loads(result.stdout)
+    except Exception:
+        devices = []
 
+    if not devices:
+        return None
+
+    udid = devices[0]["UDID"]
+
+    lockdown = LockdownClient(udid=udid)
+    info = lockdown.all_values
+
+    return {
+        "client": lockdown,
+        "name": info.get("DeviceName", "Unknown Device"),
+        "version": info.get("ProductVersion", "Unknown")
+    }
 
 def is_supported_ios(version_str: str) -> bool:
     match = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?(?:b(\d+))?", version_str)
@@ -29,22 +53,6 @@ def is_supported_ios(version_str: str) -> bool:
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def detect_device():
-    try:
-        lockdown = LockdownClient()
-        info = lockdown.all_values
-
-        return {
-            "client": lockdown,
-            "name": info.get("DeviceName", "Unknown Device"),
-            "version": info.get("ProductVersion", "Unknown")
-        }
-
-    except Exception:
-        return None
-
 
 def main():
     global device
