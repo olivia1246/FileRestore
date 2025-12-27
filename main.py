@@ -1,5 +1,5 @@
 from exploit.restore import restore_files, FileToRestore
-from pymobiledevice3.lockdown import LockdownClient
+from pymobiledevice3.lockdown import create_using_usbmux
 import re
 import sys
 import os
@@ -8,8 +8,8 @@ import json
 
 def detect_device():
     try:
-        lockdown = LockdownClient()
-    except Exception:
+        lockdown = create_using_usbmux()
+    except Exception as e:
         return None
 
     info = lockdown.all_values
@@ -27,14 +27,11 @@ def is_supported_ios(version_str: str) -> bool:
     major, minor, patch, beta = match.groups()
     major = int(major)
     minor = int(minor)
-    beta = int(beta) if beta else 0
 
     if major < 18:
         return True
     if major == 18 and minor < 1:
         return True
-    if major == 18 and minor == 1:
-        return beta <= 5
 
     return False
 
@@ -60,12 +57,12 @@ def main():
         print("No device detected. Please connect a device and try again.")
         sys.exit(1)
 
-    print(f"Connected to: {device['name']} running iOS {device['version']}")
+    print(f"Connected to {device['name']} running iOS {device['version']}.")
 
     if not is_supported_ios(device['version']):
-        print("\nDetected an unsupported version of iOS.")
+        print("\n May have detected an unsupported version of iOS 18.1 or newer.")
         print("SparseRestore was fixed in iOS 18.1 beta 6 and newer.")
-        print("This may not work for your device.")
+        print("If you are on iOS 18.1 beta 1-5 then you can safely ignore this message.")
 
     local_file = input("\nDrag and drop your file here: ").strip().strip('"')
 
