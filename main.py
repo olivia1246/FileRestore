@@ -1,9 +1,11 @@
 from exploit.restore import restore_files, FileToRestore
+from pymobiledevice3.lockdown import LockdownClient
 import re
 import sys
 import os
 
 device = None
+
 
 def is_supported_ios(version_str: str) -> bool:
     match = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?(?:b(\d+))?", version_str)
@@ -24,8 +26,25 @@ def is_supported_ios(version_str: str) -> bool:
 
     return False
 
+
 def cls():
-    os.system('cls' if os.name == 'nt' else 'clear') # i have no idea if windows works for this tool
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def detect_device():
+    try:
+        lockdown = LockdownClient()
+        info = lockdown.all_values
+
+        return {
+            "client": lockdown,
+            "name": info.get("DeviceName", "Unknown Device"),
+            "version": info.get("ProductVersion", "Unknown")
+        }
+
+    except Exception:
+        return None
+
 
 def main():
     global device
@@ -39,19 +58,21 @@ def main():
         sys.exit(0)
 
     cls()
-        
+
+    device = detect_device()
+
     if not device:
         print("No device detected. Please connect a device and try again.")
         sys.exit(1)
 
-    print(f"Connected to {device.name} running iOS {device.version}")
+    print(f"Connected to: {device['name']} running iOS {device['version']}")
 
-    if not is_supported_ios(device.version):
+    if not is_supported_ios(device['version']):
         print("\nDetected an unsupported version of iOS.")
         print("SparseRestore was fixed in iOS 18.1 beta 6 and newer.")
         print("This may not work for your device.")
 
-    local_file = input("\nDrag and drop your file here: ").strip()
+    local_file = input("\nDrag and drop your file here: ").strip().strip('"')
 
     try:
         with open(local_file, "rb") as f:
@@ -61,7 +82,7 @@ def main():
         sys.exit(1)
 
     directory_path = input("Enter the exact directory path you want the file to be restored to on the device (e.g /private/var): ").strip()
-    file_name = input("Enter the file name you would like to have the restore to use (e.g example.jpg): ").strip()
+    file_name = input("Enter the file name to restore as (e.g example.jpg): ").strip()
 
     try:
         restore_files(
@@ -71,7 +92,7 @@ def main():
                 restore_name=file_name
             )],
             reboot=False,
-            lockdown_client=None
+            lockdown_client=device["client"]
         )
 
         print(f"\nSuccessfully restored '{file_name}' to {directory_path}")
