@@ -8,7 +8,7 @@ import json
 
 def detect_device():
     device = LockdownClient()
-    info = client.get_value()
+    info = device.get_value()
 
     return {
         "client": device,
