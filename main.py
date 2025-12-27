@@ -1,5 +1,4 @@
 from exploit.restore import restore_files, FileToRestore
-from pymobiledevice3.usbmux import list_devices, Usbmux
 from pymobiledevice3.lockdown import LockdownClient
 import re
 import sys
