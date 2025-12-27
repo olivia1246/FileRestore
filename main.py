@@ -7,14 +7,13 @@ import subprocess
 import json
 
 def detect_device():
-    device = LockdownClient()
-    info = device.get_value()
-
-    return {
-        "client": device,
-        "name": info.get("DeviceName"),
-        "version": info.get("ProductVersion")
-    }
+    with LockdownClient() as device:
+        info = device.get_value()
+        return {
+            "client": device,
+            "name": info.get("DeviceName"),
+            "version": info.get("ProductVersion")
+        }
 
 def is_supported_ios(version_str: str) -> bool:
     match = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?(?:b(\d+))?", version_str)
@@ -34,7 +33,6 @@ def is_supported_ios(version_str: str) -> bool:
         return beta <= 5
 
     return False
-
 
 def cls():
     os.system('cls' if os.name == 'nt' else 'clear')
